@@ -25,7 +25,7 @@ class Sale(models.Model):
         amount_received = models.IntegerField(default=0, null=True, blank=True)
         issue_to = models.CharField(max_length = 50, null = True, blank = True)
         unit_price = models.IntegerField(default = 0, null = True, blank = True)
-        # date = models.DateField(auto_now_add= True,)
+        date = models.DateField(auto_now_add= True,)
         #calculating total
         def get_total(self):
             total = self.quantity * self.unit_price

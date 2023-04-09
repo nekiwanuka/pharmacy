@@ -9,6 +9,8 @@ from .filters import Product_filter
 from .forms import Addform, SaleForm
 
 # Create your views here.
+
+
 @login_required
 def index(request):
     products = Product.objects.all().order_by('-id')
@@ -18,7 +20,7 @@ def index(request):
 
 @login_required
 def home(request):
-    return render(request, 'products/aboutDrwhu.html')
+    return render(request, 'products/about.html')
 
 @login_required
 def product_detail(request, product_id):
@@ -81,4 +83,11 @@ def all_sales(request):
         'total': total,
         'change': change,
         'net':net
+        
 })
+    
+@login_required
+def reciept_detail(request, reciept_id):
+    reciept = Sale.objects.get(id = reciept_id)
+    return render(request, 'products/reciept_detail.html', {'reciept': reciept})
+
