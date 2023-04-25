@@ -1,12 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-#we are going to include model so that view can use those models
+# we are going to include model so that view can use those models
 from .models import Product, Sale
-#We are going to include our filter so that can be  used our by views
+# We are going to include our filter so that can be  used our by views
 from .filters import Product_filter
 
-#iclude modelform created in the form file
+# include modelform created in the form file
 from .forms import Addform, SaleForm
+
+# handling redirection after the deletion
+from django.http import HttpResponse, HttpResponseRedirect
+
+from django.urls import reverse
+
 
 # Create your views here.
 
@@ -14,33 +20,35 @@ from .forms import Addform, SaleForm
 @login_required
 def index(request):
     products = Product.objects.all().order_by('-id')
-    products_filter = Product_filter(request.GET, queryset = products)
-    products = products_filter.qs 
-    return render(request, 'products/index.html', {'products':products,'products_filter': products_filter})
+    products_filter = Product_filter(request.GET, queryset=products)
+    products = products_filter.qs
+    return render(request, 'products/index.html', {'products': products, 'products_filter': products_filter})
+
 
 @login_required
 def home(request):
     return render(request, 'products/about.html')
 
+
 @login_required
 def product_detail(request, product_id):
-    product = Product.objects.get(id = product_id)
+    product = Product.objects.get(id=product_id)
     return render(request, 'products/product_detail.html', {'product': product})
 
 
 @login_required
 def issued_item(request, pk):
-    issued_item = Product.objects.get(id = pk)
+    issued_item = Product.objects.get(id=pk)
     sales_form = SaleForm(request.POST)
 
     if request.method == 'POST':
-        #check if required input is as is supposed to be
+        # check if required input is as is supposed to be
         if sales_form.is_valid():
-            new_sales = sales_form.save(commit = False)
+            new_sales = sales_form.save(commit=False)
             new_sales.item = issued_item
             new_sales.unit_price = issued_item.unit_price
             new_sales.save()
-            #to keep track of remainding stock aftr sale
+            # to keep track of remaining stock after sale
             issued_quantity = int(request.POST['quantity'])
             issued_item.total_quantity -= issued_quantity
             issued_item.save()
@@ -50,6 +58,15 @@ def issued_item(request, pk):
 
             return redirect('reciept')
     return render(request, 'products/issued_item.html', {'sales_form': sales_form})
+
+
+@login_required
+def delete_item(request, product_id):
+    delete = Product.objects.get(id=product_id)
+    delete.delete()
+    return HttpResponseRedirect(reverse('index'))
+
+
 @login_required
 def reciept(request):
     sales = Sale.objects.all().order_by('-id')
@@ -58,18 +75,18 @@ def reciept(request):
 
 @login_required
 def add_to_stock(request, pk):
-    issued_item = Product.objects.get(id = pk)
+    issued_item = Product.objects.get(id=pk)
     form = Addform(request.POST)
     if request.method == 'POST':
         if form.is_valid():
             add_quantity = int(request.POST['recieved_quantity'])
             issued_item.total_quantity += add_quantity
             issued_item.save()
-            #to add to the remaining stock as quantity is reducing
+            # to add to the remaining stock as quantity is reducing
             print(add_quantity)
             print(issued_item.total_quantity)
             return redirect('index')
-    return render(request, 'products/add_to_stock.html',{'form':form})
+    return render(request, 'products/add_to_stock.html', {'form': form})
 
 
 @login_required
@@ -79,15 +96,15 @@ def all_sales(request):
     change = sum([items.get_change() for items in sales])
     net = total - change
     return render(request, 'products/all_sales.html', {
-        'sales':sales,
+        'sales': sales,
         'total': total,
         'change': change,
-        'net':net
-        
-})
-    
+        'net': net
+
+    })
+
+
 @login_required
 def reciept_detail(request, reciept_id):
-    reciept = Sale.objects.get(id = reciept_id)
+    reciept = Sale.objects.get(id=reciept_id)
     return render(request, 'products/reciept_detail.html', {'reciept': reciept})
-

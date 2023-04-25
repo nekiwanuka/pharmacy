@@ -1,5 +1,5 @@
 import django_filters
-from .models import Category, Product
+from .models import Category, Product, Sale
 #creating a class to filter models 
 class Product_filter(django_filters.FilterSet):
     class Meta: #modify content of other class
@@ -11,3 +11,6 @@ class Category_filter(django_filters.FilterSet):
     class Meta:
         model = Category
         fields = ['name']
+        
+
+    

@@ -14,5 +14,6 @@ urlpatterns = [
     path('reciept', views.reciept, name='reciept'),#handle a reciept after a successful sale
     path('all_sales', views.all_sales, name ='all_sales'),#handles all all_sales from the browser
     path('reciept_detail/<int:reciept_id>/', views.reciept_detail, name ='reciept_detail'),
+    path('delete/<int:product_id>', views.delete_item, name='delete_item'),
 ]
 
